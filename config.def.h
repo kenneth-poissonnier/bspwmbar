@@ -7,8 +7,12 @@
 
 /* intel */
 #define THERMAL_PATH "/sys/class/thermal/thermal_zone0/temp"
+#define BACKLIGHT "intel_backlight"
 /* k10temp */
 /* #define THERMAL_PATH "/sys/class/hwmon/hwmon1/temp1_input" */
+
+/* for laptops define the battery (/sys/class/power_supply/<battery>) */
+#define BATTERY "BAT1"
 
 /* max length of monitor output name and bspwm desktop name */
 #define NAME_MAXSZ  32
@@ -20,7 +24,7 @@
 #define TRAY_ICONSZ 16
 
 /* set font pattern for find fonts, see fonts-conf(5) */
-const char *fontname = "sans-serif:size=10";
+const char *fontname = "MonoSpace:size=10";
 
 /* set strings for uses on render bspwm desktop */
 #define WS_ACTIVE   ""
@@ -30,17 +34,17 @@ const char *fontname = "sans-serif:size=10";
  * color map for bspwmbar
  */
 const char *colors[] = {
-	"#222222", /* black */
-	"#7f7f7f", /* gray */
-	"#e5e5e5", /* white */
-	"#1793d1", /* logo color */
+    "#222222", /* black */
+    "#7f7f7f", /* gray */
+    "#e5e5e5", /* white */
+    "#1793d1", /* logo color */
 
-	"#449f3d", /* success color */
-	"#2f8419", /* normal color */
-	"#f5a70a", /* warning color */
-	"#ed5456", /* critical color */
+    "#449f3d", /* success color */
+    "#2f8419", /* normal color */
+    "#f5a70a", /* warning color */
+    "#ed5456", /* critical color */
 
-	"#555555", /* dark gray */
+    "#555555", /* dark gray */
 };
 
 /*
@@ -67,23 +71,26 @@ const char *colors[] = {
  */
 /* for modules on the left (float: left;) */
 const Module left_modules[] = {
-	/* function    argument        event handler */
-	/* float: left; */
-	{ logo,        "",           NULL },
-	{ desktops,    NULL,           NULL },
-	{ windowtitle, "…",           NULL },
+    /* function    argument        event handler */
+    /* float: left; */
+    { logo,        "",           NULL },
+    { desktops,    NULL,           NULL },
+    { windowtitle, "…",           NULL },
 };
 
 /* for modules on the right (float: right;) */
 const Module right_modules[] = {
-	/* float: right; */
-	{ datetime,    "%H:%M",        NULL },
-	{ thermal,     THERMAL_PATH,   NULL },
-	{ filesystem,  "/",            NULL },
-	{ volume,      NULL,           volume_ev },
-	{ memgraph,    NULL,           NULL },
-	{ cpugraph,    NULL,           NULL },
-	{ systray,     NULL,           NULL },
+    /* float: right; */
+    { datetime, "%d-%m-%Y  %H:%M", NULL }, 
+    { battery, BATTERY, NULL }, 
+    { volume, NULL, volume_ev },
+    { brightness, BACKLIGHT, NULL },
+    { wireless_network, "wlp1s0", NULL }, 
+    { thermal, THERMAL_PATH, NULL }, 
+    { memgraph, NULL, NULL }, 
+    { cpugraph, NULL, NULL }, 
+    { filesystem, "/", NULL }, 
+    { systray, NULL, NULL }, 
 };
 
 #endif
