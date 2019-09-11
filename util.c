@@ -69,3 +69,14 @@ list_del(list_head *head)
     next->prev = prev;
     prev->next = next;
 }
+
+void
+check_file(const char *fpath, int *fstate) {
+    if (*fstate == -1) {
+        if (access(fpath, F_OK) != -1)
+            *fstate = 1;
+        else
+            *fstate = 0;
+    }
+    return;
+}

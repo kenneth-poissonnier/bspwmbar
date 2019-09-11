@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <string.h>
 
 #include "bspwmbar.h"
 #include "util.h"
@@ -12,17 +13,23 @@
 static char *format = "%s%s %d%%";
 
 
-static int get_state(const char *battery, char **state) {
+static void
+get_state(const char *battery, char **state) {
     // Check if charging or not!
     static char spath[128];
+    static int fstatus_found = -1;
+    static char status[16];
+
     snprintf(spath, 128, "/sys/class/power_supply/%s/status", battery);
 
-    FILE* sfile = fopen(spath, "r");
-    int c = fgetc(sfile);
+    check_file(spath, &fstatus_found);
 
-    *state = (c == 67) ? " " : "";
+    if (!fstatus_found || pscanf(spath, "%s%", &status) == -1) {
+        *state = "";
+        return;
+    }
 
-    return 0;
+    *state = (strcmp(status, "Charging") == 0 || strcmp(status, "Full") == 0) ? " " : "";
 }
 
 
@@ -38,14 +45,9 @@ battery(DC dc, const char *battery)
     static char cpath[128];
     snprintf(cpath, 128, "/sys/class/power_supply/%s/capacity", battery);
 
-    if (battery_found == -1) {
-        if (access(cpath, F_OK) != -1)
-            battery_found = 1;
-        else
-            battery_found = 0;
-    }
+    check_file(cpath, &battery_found);
     if (!battery_found)
-        return;
+        return;  // No battery found
 
     time_t curtime = time(NULL);
     if (curtime - prevtime < 1)
@@ -53,41 +55,38 @@ battery(DC dc, const char *battery)
     prevtime = curtime;
 
     if (pscanf(cpath, "%ju", &capacity) == -1)
-        return;
+        return;  // Cannot read capacity
 
-    if (get_state(battery, &state) != 0)
-        return;
+    get_state(battery, &state);
 
     switch (capacity) {
         case 0 ... 10:
-            // empty
             color_number = RED;
-            symbol = "!  !";
+            symbol = "!  !";  // empty symbol with expression marks
             break;
         case 11 ... 19:
-            // almost empty
             color_number = RED;
-            symbol = "";
+            symbol = "";  // empty symbol
             break;
-        case 20 ... 34:
+        case 20 ... 39:
             // 1/3 full
             color_number = ORANGE;
-            symbol = "";
+            symbol = "";  // quarter full symbol
             break;
-        case 35 ... 49:
+        case 40 ... 59:
             // 1/2 full
-            color_number = WHITE;
-            symbol = "";
+            color_number = GREEN;
+            symbol = "";  // half full symbol
             break;
-        case 50 ... 85:
+        case 60 ... 85:
             // 3/4 full
             color_number = LIGHT_GREEN;
-            symbol = "";
+            symbol = "";  // 2/3th full symboll
             break;
         case 86 ... 100:
             // full
-            color_number = GREEN;
-            symbol = "";
+            color_number = WHITE;
+            symbol = "";  // full symbol
             break;
     }
 

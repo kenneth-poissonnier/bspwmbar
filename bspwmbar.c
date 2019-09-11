@@ -35,10 +35,12 @@
 #include "systray.h"
 #include "config.h"
 
+#define EVER ;;
+
 /* bspwm commands */
 #define SUBSCRIBE_REPORT "subscribe\0report"
 /* epoll max events */
-#define MAX_EVENTS 10
+#define MAX_EVENTS 16
 
 /* temporary buffer */
 char buf[1024];
@@ -1444,23 +1446,19 @@ poll_loop(void (* handler)())
     /* polling fd */
 #if defined(__linux)
     int epoll_wait_err = 0;  // Boolean if the code should epoll_wait_err on epoll_wait -1 return status
-    while (1) {
+    for (EVER) {
         /* When epoll_wait returns -1, an error has occured.
          * In the case of suspension this happons once, after that the code should continue.
          * In other cases this re-occurs and the loop should end. */
         nfd = epoll_wait(pfd, events, MAX_EVENTS, -1);
 
         if (nfd == -1 && epoll_wait_err == 1) {
-            printf("poll_loop terminated\n");
-            return -1;  // Loop in main exits
+            return -1;  // End 'forever' loop
         } else if (nfd == -1) {
-            printf("epoll_wait returned -1\n");
             epoll_wait_err = 1;
             continue;  // Check if the error occurs again (run while loop again)
         } else if (epoll_wait_err == 1) {
-            polling_stop();
-            printf("Reinitializing polling\n");
-            return 1;  // Rerun the loop in main
+            epoll_wait_err = 0;  // Reset error status
         }
 
         need_render = 0;
@@ -1487,7 +1485,6 @@ poll_loop(void (* handler)())
                     need_render = 1;
                     break;
                 default:  // States which amongs PR_REINIT (but can also be other states which may be wrong)
-                    printf("Recieved the poll-state: %d (PR_REINIT=%d), see bspwmbar.c #1483\n", result, PR_REINIT);
                     poll_del(pollfd);
                     pollfd->fd = pollfd->init();
                     poll_add(pollfd);
@@ -1637,13 +1634,11 @@ main(int argc, char *argv[])
     filter = XInternAtom(bar.dpy, "_NET_WM_NAME", 1);
     xembed_info = XInternAtom(bar.dpy, "_XEMBED_INFO", 1);
 
+    /* polling initialize for modules */
+    poll_init();
+
     /* main loop */
-    int res;
-    do {
-        /* polling initialize for modules */
-        poll_init();
-        res = poll_loop(render);
-    } while (res == 1);
+    poll_loop(render);
 
 CLEANUP:
     /* cleanup resources */
