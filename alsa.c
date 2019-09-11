@@ -76,6 +76,10 @@ alsa_control(uint8_t ctlno)
     snd_mixer_selem_id_set_name(sid, "Master");
     snd_mixer_elem_t *elem = snd_mixer_find_selem(h, sid);
 
+    if (elem == 0x0) {
+        printf("Error: No snd_mixer_element found: alsa.c #80\n");
+        return;
+    }
     switch (ctlno) {
     case ALSACTL_GETINFO:
         get_info(elem);

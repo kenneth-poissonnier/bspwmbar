@@ -54,5 +54,6 @@ void list_init(list_head *head, list_head *prev, list_head *next);
 void list_add(list_head *head, list_head *entry);
 void list_add_tail(list_head *head, list_head *entry);
 void list_del(list_head *head);
+void check_file(const char *, int *);
 
 #endif

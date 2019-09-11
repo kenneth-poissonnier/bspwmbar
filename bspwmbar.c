@@ -35,10 +35,12 @@
 #include "systray.h"
 #include "config.h"
 
+#define EVER ;;
+
 /* bspwm commands */
 #define SUBSCRIBE_REPORT "subscribe\0report"
 /* epoll max events */
-#define MAX_EVENTS 10
+#define MAX_EVENTS 16
 
 /* temporary buffer */
 char buf[1024];
@@ -894,7 +896,7 @@ render_label(DC dc)
             width = dc_get_x(dc) - x;
         else if (dc->align == DA_RIGHT)
         {
-            if (j != dc->nlabel -1)
+            if (j < dc->nlabel-2)  // -1 if not using systray, -2 if using systray
                 // Draw vertical lines between the nodes, except for the last node on the right
                 draw_string(dc, &cols[FGCOLOR], "| ");
             width = x - dc_get_x(dc);
@@ -1420,7 +1422,7 @@ xev_handle()
  * poll_loop() - polling loop
  * @handler: rendering function
  */
-static void
+static int
 poll_loop(void (* handler)())
 {
     int i, nfd, need_render;
@@ -1443,19 +1445,22 @@ poll_loop(void (* handler)())
 
     /* polling fd */
 #if defined(__linux)
-    int terminate = 0;  // Boolean if the code should terminate on epoll_wait -1 return status
-    while (1) {
-        nfd = epoll_wait(pfd, events, MAX_EVENTS, -1);
+    int epoll_wait_err = 0;  // Boolean if the code should epoll_wait_err on epoll_wait -1 return status
+    for (EVER) {
         /* When epoll_wait returns -1, an error has occured.
          * In the case of suspension this happons once, after that the code should continue.
          * In other cases this re-occurs and the loop should end. */
-        if (nfd == -1) {
-            if (terminate == 1)
-                break;
-            terminate = 1;
-            continue;
+        nfd = epoll_wait(pfd, events, MAX_EVENTS, -1);
+
+        if (nfd == -1 && epoll_wait_err == 1) {
+            return -1;  // End 'forever' loop
+        } else if (nfd == -1) {
+            epoll_wait_err = 1;
+            continue;  // Check if the error occurs again (run while loop again)
+        } else if (epoll_wait_err == 1) {
+            epoll_wait_err = 0;  // Reset error status
         }
-        terminate = 0;
+
         need_render = 0;
 #elif defined(__OpenBSD__)
     struct timespec tspec = { 0 };
@@ -1471,15 +1476,20 @@ poll_loop(void (* handler)())
 #elif defined(__OpenBSD__)
             pollfd = (PollFD *)events[i].udata;
 #endif
-            switch ((int)pollfd->handler(pollfd->fd)) {
-            case PR_UPDATE:
-                need_render = 1;
-                break;
-            case PR_REINIT:
-                poll_del(pollfd);
-                pollfd->fd = pollfd->init();
-                poll_add(pollfd);
-                break;
+            //switch ((int)pollfd->handler(pollfd->fd)) {
+            int result = (int)pollfd->handler(pollfd->fd);
+            switch (result) {
+                case PR_NOOP:
+                    break;  // do nothing, up to next iteration
+                case PR_UPDATE:
+                    need_render = 1;
+                    break;
+                default:  // States which amongs PR_REINIT (but can also be other states which may be wrong)
+                    poll_del(pollfd);
+                    pollfd->fd = pollfd->init();
+                    poll_add(pollfd);
+                    need_render = 1;
+                    break;
             }
         }
         if (need_render) {
@@ -1491,6 +1501,7 @@ poll_loop(void (* handler)())
             handler();
         }
     }
+    return -1;  // While (1) loop terminated for some reason
 }
 
 /**
