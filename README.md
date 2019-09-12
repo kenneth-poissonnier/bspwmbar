@@ -19,6 +19,7 @@ Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
 - [x] Refactor code
 - [x] Restyled bar appearance
 - [ ] Text background colorization
+- [ ] Reorganize file structure (create src folder)
 
 ## Features and todo by odknt
 
