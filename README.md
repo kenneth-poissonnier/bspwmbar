@@ -3,6 +3,8 @@
 ![AUR Version](https://img.shields.io/aur/version/bspwmbar.svg)
 ![AUR License](https://img.shields.io/aur/license/bspwmbar.svg)
 
+This version is forked from [odknt](https://github.com/odknt/bspwmbar).
+<br />
 A lightweight status bar for bspwm.
 
 Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
@@ -10,7 +12,16 @@ Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
 
 ![bspwmbar.png](docs/bspwmbar.png)
 
-## Features and TODO
+## Features and todo by Kenneth
+- [x] Backlight/brightness
+- [x] Battery status
+- [x] Wifi (Used code from yabar)
+- [x] Refactor code
+- [x] Restyled bar appearance
+- [ ] Text background colorization
+- [ ] Reorganize file structure (create src folder)
+
+## Features and todo by odknt
 
 - [x] Support multiple monitors (Xrandr)
 - [x] Render text
@@ -22,16 +33,11 @@ Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
 - [x] ALSA volume
 - [x] Memory usage
 - [x] CPU usage per core
-- [x] Backlight
-- [x] Battery (Colorized)
-- [x] Wifi (Used code from yabar)
 - [x] Implements clickable label
 - [x] System Tray support
 - [x] Refactor code
-- [x] Refactor code 2 (tabs replaced by spaces)
-- [x] Restyled
 - [x] OpenBSD support
-- [ ] FreeBSD support
+- [ ] FreeBSD support 
 - [ ] Pulseaudio support (just enough only ALSA support?)
 - [ ] Decrease memory usage
 
