@@ -22,7 +22,7 @@ Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
 - [ ] Reorganize file structure (create src folder)
 
 ## Features and todo by odknt
-
+See [https://github.com/odknt/bspwmbar](https://github.com/odknt/bspwmbar)
 - [x] Support multiple monitors (Xrandr)
 - [x] Render text
 - [x] Bspwm workspaces
@@ -44,12 +44,6 @@ Currently required [nerd-fonts](https://github.com/ryanoasis/nerd-fonts)
 ## Configure
 
 Modify and recompile `config.h` like `dwm`, `st`.
-
-## Install
-
-You can install from [AUR](https://aur.archlinux.org/packages/bspwmbar/) on Arch Linux.
-
-Or build and install by using `make` and `make install`.
 
 ## Build & Debug
 
