@@ -896,7 +896,7 @@ render_label(DC dc)
             width = dc_get_x(dc) - x;
         else if (dc->align == DA_RIGHT)
         {
-            if (j < dc->nlabel-2)  // -1 if not using systray, -2 if using systray
+            if (j < dc->nlabel-1)  // -1 if not using systray, -2 if using systray
                 // Draw vertical lines between the nodes, except for the last node on the right
                 draw_string(dc, &cols[FGCOLOR], "| ");
             width = x - dc_get_x(dc);

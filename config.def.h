@@ -68,10 +68,10 @@ const Module right_modules[] = {
     { volume, NULL, volume_ev },
     { brightness, BACKLIGHT, NULL },
     { wireless_network, "wlp1s0", NULL }, 
+    //{ filesystem, "/", NULL }, 
     { thermal, THERMAL_PATH, NULL }, 
     { memgraph, NULL, NULL }, 
     { cpugraph, NULL, NULL }, 
-    //{ filesystem, "/", NULL }, 
     //{ systray, NULL, NULL }, 
 };
 
